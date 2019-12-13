@@ -52,6 +52,7 @@ RUN cp /usr/local/owasp-modsecurity-crs-3.0.2/rules/RESPONSE-999-EXCLUSION-RULES
 RUN nginx -s reload
 # install td-agent
 RUN curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh
+RUN td-agent-gem install fluent-plugin-elasticsearch
 COPY ./conf/td-agent.conf /etc/td-agent/
 # install php-fpm
 
