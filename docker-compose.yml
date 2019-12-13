@@ -1,0 +1,41 @@
+version: "1"
+
+networks:
+  my-network:
+    driver: bridge
+
+services:
+  my-service:
+    container_name: nginx-modsec
+    build: 
+      dockerfile: Dockerfile
+      context: ./nginx-php-modsec-fluentd/
+    restart: always
+    network:
+      - my-network
+    ports: 
+      - "8899:80"
+
+  my-elastic:
+    container_name: my-elastic
+    image: "elasticsearch:latest"
+    hostname: elastic
+    restart: always
+    networks:
+      - my-network
+    ports: 
+      - "1200:1200"
+
+  my-kibana:
+    container_name: my-kibana
+    image: "kibana:latest"
+    hostname: kibana
+    restart: always
+    networks:
+      - my-network
+    ports: "5601:5601"
+    links:
+      - "my-elastic:elasticsearch"
+
+
+
