@@ -6,8 +6,8 @@ EXPOSE 80
 # install nginx from mainline
 WORKDIR /home
 RUN apt install curl gnupg2 ca-certificates lsb-release -y
-RUN echo "deb http://nginx.org/packages/mainline/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
-RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
+RUN echo "deb http://nginx.org/packages/mainline/ubuntu `lsb_release -cs` nginx" | tee /etc/apt/sources.list.d/nginx.list
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | apt-key add -
 RUN apt-key fingerprint ABF5BD827BD9BF62
 RUN apt update -y && apt install nginx -y
 
@@ -32,32 +32,41 @@ RUN mv /etc/nginx/modsec/modsecurity.conf-recommended /etc/nginx/modsec/modsecur
 RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsec/modsecurity.conf
 
 # copy /etc/nginx/modsec/main.conf
-COPY ./conf/main.conf /etc/nginx/modsec/
+COPY ./config/main.conf /etc/nginx/modsec/
 # copy modsecurity on;
 # copy /etc/nginx/nginx.conf
-COPY ./conf/nginx.conf /etc/nginx/
+COPY ./config/nginx.conf /etc/nginx/
 # unicode mapping
 RUN mv /home/ModSecurity/unicode.mapping /etc/nginx/modsec/
 # copy conf.d
-COPY  ./conf/default.conf /etc/nginx/conf.d/
+COPY  ./config/default.conf /etc/nginx/conf.d/
 
 WORKDIR /home
 RUN wget https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/v3.0.2.tar.gz
 RUN tar -xzvf v3.0.2.tar.gz
-RUN sudo mv owasp-modsecurity-crs-3.0.2 /usr/local
+RUN mv owasp-modsecurity-crs-3.0.2 /usr/local
 WORKDIR /usr/local/owasp-modsecurity-crs-3.0.2
 RUN cp crs-setup.conf.example crs-setup.conf
 RUN cp /usr/local/owasp-modsecurity-crs-3.0.2/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /usr/local/owasp-modsecurity-crs-3.0.2/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
 RUN cp /usr/local/owasp-modsecurity-crs-3.0.2/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example /usr/local/owasp-modsecurity-crs-3.0.2/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
-RUN nginx -s reload
+RUN nginx -t
 # install td-agent
-RUN curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh
+RUN curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sed "s/sudo -k//g" | sed "s/sudo//g"|sh
+
+RUN td-agent-gem install fluent-plugin-grep
 RUN td-agent-gem install fluent-plugin-elasticsearch
-COPY ./conf/td-agent.conf /etc/td-agent/
+COPY ./config/td-agent.conf /etc/td-agent/
 # install php-fpm
 
-RUN sudo apt install php7.3 php7.3-fpm -y 
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:ondrej/nginx-mainline
+RUN add-apt-repository ppa:ondrej/php
+RUN apt update
+
+ENV TZ=Europe/Minsk
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 2 dong tren hoac xai cai nay ENV DEBIAN_FRONTEND=noninteractive 
+
+RUN echo "1"| apt install php7.3-fpm php7.3-common php7.3-mysql php7.3-xml php7.3-xmlrpc php7.3-curl php7.3-gd php7.3-imagick php7.3-cli php7.3-dev php7.3-imap php7.3-mbstring php7.3-opcache php7.3-soap php7.3-zip unzip -yq
 
 RUN rm -rf /home/*
-
-CMD [ "systemctl status nginx" ]
