@@ -142,7 +142,7 @@ RUN apt install mysql-server -y
 RUN service nginx start
 RUN service php7.3-fpm start
 RUN service td-agent start
-RUN service mysql start
+#RUN service mysql start
 RUN rm -rf /home/*
 
 CMD ["service", "nginx","status"]
