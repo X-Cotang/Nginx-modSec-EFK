@@ -142,4 +142,4 @@ RUN echo "1"| apt install php7.3-fpm php7.3-common php7.3-mysql php7.3-xml php7.
 
 RUN rm -rf /home/*
 
-CMD ["/bin/ping", "localhost"]
+CMD ["service", "nginx","status"]
