@@ -16,7 +16,8 @@ services:
     hostname: elastic
     restart: always
     ports: 
-      - "1200:1200"
+      - "9200:9200"
+      - "9300:9300"
 
   my-kibana:
     container_name: my-kibana
