@@ -6,7 +6,6 @@ services:
     build: 
       dockerfile: Dockerfile
       context: ./nginx-php-modsec-fluentd/
-    restart: always
     ports: 
       - "8899:80"
 
