@@ -145,4 +145,4 @@ RUN service td-agent start
 #RUN service mysql start
 RUN rm -rf /home/*
 
-CMD ["service", "nginx","status"]
+CMD ["nginx", "-g", "daemon off;"]
