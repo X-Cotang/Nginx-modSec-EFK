@@ -100,6 +100,8 @@ RUN cp /usr/local/owasp-modsecurity-crs-3.0.2/rules/REQUEST-900-EXCLUSION-RULES-
 
 RUN cp /usr/local/owasp-modsecurity-crs-3.0.2/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example /usr/local/owasp-modsecurity-crs-3.0.2/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
 
+COPY ./config/modsecurity.conf /etc/nginx/modsec/modsecurity.conf
+
 RUN nginx -t
 
 # install td-agent
